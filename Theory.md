@@ -48,6 +48,10 @@ Callback function of `SetImmediate()` will run immediate after event loop finish
 
 There are other phases of event loop like idol and prepare phase, but JS cannot do anything with them, so they are not important.
 
+# Node vs JavaScript
+
+<img src="Theory.assets/Screen Shot 2022-02-14 at 1.48.42 PM.png" alt="Screen Shot 2022-02-14 at 1.48.42 PM" style="zoom:50%;" />
+
 # Node vs php and python
 
 Server like Apache is model of blocking, it will create thread for each request.
@@ -187,15 +191,25 @@ const { bar } = require ('./someFile');
 
 Package, a collection of modules
 
-`npm init -y`
+`npm init -y` 
+
+-y: say yes to all init questions
 
 `npm install`
+
+--save: for production
+
+--save-dev: for development
+
+-g: globally in machine to use anywhere
+
+Note: If modules not installed globally, the executable file will be in `./node_modules/.bin` folder. i.e. in terminal, run `./node_modules/.bin/nodemon app.js`
 
 <img src="Theory.assets/Screen Shot 2022-01-05 at 9.12.46 PM.png" alt="Screen Shot 2022-01-05 at 9.12.46 PM" style="zoom:50%;" />
 
 <img src="Theory.assets/Screen Shot 2022-01-07 at 6.33.53 PM.png" alt="Screen Shot 2022-01-07 at 6.33.53 PM" style="zoom:50%;" />
 
-# Semantic Versioning
+## Semantic Versioning
 
 Given a version number MAJOR.MINOR.PATCH, increment the:
 
@@ -215,6 +229,12 @@ Specify the detailed origin source of package we are using, include version, whe
 
 1. If major version >= 1, update to the latest minor version of current major version. i.e. ^1.8.0 will update to 1.9.3, will not update to 2.2.0
 
+## Vulnerabilities In Dependencies
+
+`npm audit` to check vulnerabilities
+
+`npm audit fix` to fix vulnerabilities
+
 # nvm
 
 Node Version Manager, is a bash script used to manage multiple released Node.js versions.
@@ -227,6 +247,10 @@ When type `node` without arguments, it will enter repl mode.
 
 Read => Eval(Evaluation) => Print => Loop
 
-# Node vs JavaScript
+# Nodemon
 
-<img src="Theory.assets/Screen Shot 2022-02-14 at 1.48.42 PM.png" alt="Screen Shot 2022-02-14 at 1.48.42 PM" style="zoom:50%;" />
+Nodemon can automatically restarting the node application when file changes in the directory are detected.
+
+`npm install nodemon --save-dev`
+
+change `"scripts":{"dev":"nodemon app.js"}` then `npm run dev`
