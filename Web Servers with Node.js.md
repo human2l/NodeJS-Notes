@@ -204,3 +204,65 @@ Access-Control-Allow-Origin: https://www.google.com
 Access-Control-Allow-Origin: *
 
 <img src="Web Servers with Node.js.assets/Screen Shot 2022-02-18 at 8.25.05 PM.png" alt="Screen Shot 2022-02-18 at 8.25.05 PM" style="zoom:50%;" />
+
+# Restful APIs
+
+<img src="Web Servers with Node.js.assets/Screen Shot 2022-02-19 at 9.48.28 PM.png" alt="Screen Shot 2022-02-19 at 9.48.28 PM" style="zoom:50%;" />
+
+Stateless: each request is separate and not connected to any state to the client
+
+# CRUD
+
+Create, Read, Update, Delete
+
+| HTTP Verb | CRUD           | Entire Collection (e.g. /customers)                          | Specific Item (e.g. /customers/{id})                         |
+| :-------- | :------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| POST      | Create         | 201 (Created), 'Location' header with link to /customers/{id} containing new ID. | 404 (Not Found), 409 (Conflict) if resource already exists.. |
+| GET       | Read           | 200 (OK), list of customers. Use pagination, sorting and filtering to navigate big lists. | 200 (OK), single customer. 404 (Not Found), if ID not found or invalid. |
+| PUT       | Update/Replace | 405 (Method Not Allowed), unless you want to update/replace every resource in the entire collection. | 200 (OK) or 204 (No Content). 404 (Not Found), if ID not found or invalid. |
+| PATCH     | Update/Modify  | 405 (Method Not Allowed), unless you want to modify the collection itself. | 200 (OK) or 204 (No Content). 404 (Not Found), if ID not found or invalid. |
+| DELETE    | Delete         | 405 (Method Not Allowed), unless you want to delete the whole collection—not often desirable. | 200 (OK). 404 (Not Found), if ID not found or invalid.       |
+
+References: https://www.restapitutorial.com/lessons/httpmethods.html
+
+# Templating Engines
+
+Template engines supported by Express.js:
+
+<img src="Web Servers with Node.js.assets/Screen Shot 2022-02-19 at 11.08.48 PM.png" alt="Screen Shot 2022-02-19 at 11.08.48 PM" style="zoom:50%;" />
+
+## handlebars
+
+`npm install hbs --save`
+
+Create a `views`folder under project folder
+
+In server.js:
+
+```js
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+
+app.get('/' ,(req,res) => {
+  res.render('index', {
+    title: 'My Friends Ary VERYY Clever',
+    caption: 'Let\'s go skiing!'
+  })
+})
+```
+
+In ./views/index.hbs:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='site/css/style.css' />
+  </head>
+  <body>
+    {{{caption}}}
+  </body>
+</html>
+```
+

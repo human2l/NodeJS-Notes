@@ -254,3 +254,4 @@ Nodemon can automatically restarting the node application when file changes in t
 `npm install nodemon --save-dev`
 
 change `"scripts":{"dev":"nodemon app.js"}` then `npm run dev`
+

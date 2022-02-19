@@ -1,14 +1,16 @@
-<img src="index.assets/Screen Shot 2022-01-07 at 6.37.38 PM.png" alt="Screen Shot 2022-01-07 at 6.37.38 PM" style="zoom:40%;" />
+<img src="index.assets/Screen Shot 2022-01-07 at 6.37.38 PM.png" alt="Screen Shot 2022-01-07 at 6.37.38 PM" style="zoom:25%;" />
 
-<img src="index.assets/Screen Shot 2022-02-09 at 3.54.45 PM.png" alt="Screen Shot 2022-02-09 at 3.54.45 PM" style="zoom:50%;" />
+<img src="index.assets/Screen Shot 2022-02-09 at 3.54.45 PM.png" alt="Screen Shot 2022-02-09 at 3.54.45 PM" style="zoom:30%;" />
 
-<img src="index.assets/Screen Shot 2022-02-09 at 3.56.12 PM.png" alt="Screen Shot 2022-02-09 at 3.56.12 PM" style="zoom:50%;" />
+<img src="index.assets/Screen Shot 2022-02-09 at 3.56.12 PM.png" alt="Screen Shot 2022-02-09 at 3.56.12 PM" style="zoom:35%;" />
 
 `npm install --save express`
 
 # Middleware
 
 <img src="index.assets/Screen Shot 2022-02-09 at 4.04.49 PM.png" alt="Screen Shot 2022-02-09 at 4.04.49 PM" style="zoom:50%;" />
+
+<img src="index.assets/Screen Shot 2022-02-19 at 10.57.18 AM.png" alt="Screen Shot 2022-02-19 at 10.57.18 AM" style="zoom:50%;" />
 
 ```js
 const http = require('http');
@@ -261,3 +263,4 @@ now express will try to find `/css/main.css` inside `public` folder
 # Resources
 
 Express.js official: https://expressjs.com/en/starter/installing.html
+
