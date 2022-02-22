@@ -255,3 +255,28 @@ Nodemon can automatically restarting the node application when file changes in t
 
 change `"scripts":{"dev":"nodemon app.js"}` then `npm run dev`
 
+# Testing
+
+<img src="Theory.assets/Screen Shot 2022-02-22 at 8.03.53 PM.png" alt="Screen Shot 2022-02-22 at 8.03.53 PM" style="zoom:25%;" />
+
+`npm install --save-dev jest`
+
+## API testing
+
+`npm install --save-dev supertest`
+
+```js
+const request = require('supertest')
+const app = require('../../app')//app is express app that listening
+
+describe('Test GET /launches', () => {
+    test('It should respond with 200 success', async () => {
+        const response = await request(app)
+        .get('/launches')
+        .expect('Content-Type', /json/)
+        .expect(200)
+    })
+})
+})
+```
+
