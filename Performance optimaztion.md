@@ -165,3 +165,75 @@ It will automatically create clusters for us:
 
 `pm2 logs --lines 200` show recent 200 lines of logs
 
+`pm2 show [id]`show details of a process
+
+<img src="Performance optimaztion.assets/Screen Shot 2022-02-24 at 1.06.58 PM.png" alt="Screen Shot 2022-02-24 at 1.06.58 PM" style="zoom:50%;" />
+
+`pm2 start server.js -l logs.txt -i max` to start with logs saving into logs.txt
+
+`pm2 stop [id]` and `pm2 start [id]` to stop and start a process
+
+use `pm2 monit` in system terminal to start a dashboard to monitor processes:
+
+<img src="Performance optimaztion.assets/Screen Shot 2022-02-24 at 1.32.32 PM.png" alt="Screen Shot 2022-02-24 at 1.32.32 PM" style="zoom:50%;" />
+
+### Warning:
+
+Each process run a duplicated server.js file, which means our server must be stateless, otherwise the state will not be shared among processes. 
+
+i.e. If we are using `Map()` , or `Array()` Object instead of a database(persistance layer) to store data, each process will have their own `Map()` or `Array()`. `GET` API will not get the whole data requested.
+
+## Zero Downtime Restart
+
+Sometimes after we changes the code of server and need a server restart, normal restart will disconnect all of current user.
+
+use `reload server` instead of `restart server` to restart process one by one, keeping at least one process running at all times
+
+# Worker threads
+
+`worker_threads` module enables the use of threads that execute JavaScript in parallel.
+
+V8 Isolates is a new feature of V8 engine, which are isolated instance of V8 engine.
+
+Worker threads can use these isolates to create new threads.
+
+<img src="Performance optimaztion.assets/Screen Shot 2022-02-24 at 2.00.17 PM.png" alt="Screen Shot 2022-02-24 at 2.00.17 PM" style="zoom:50%;" />
+
+## Cluster vs Worker threads
+
+<img src="Performance optimaztion.assets/Screen Shot 2022-02-24 at 2.00.50 PM.png" alt="Screen Shot 2022-02-24 at 2.00.50 PM" style="zoom:50%;" />
+
+Worker threads uses index.js instead of server.js.
+
+Worker threads are not designed to share requests coming into a server.
+
+Worker threads module doesn't include any built in functionality to run a server on one port and distribute incoming requests between each thread. We need to implement the distribution of work ourselves.
+
+**Worker threads can share memory between each other.**
+
+### threads.js
+
+```js
+const { 
+  isMainThread,
+  workerData,
+  Worker
+} = require('worker_threads');
+
+if (isMainThread) {
+  console.log(`Main Thread! Process ID: ${process.pid}`);
+	new Worker(__filename, {
+    workerData: [7,6,2,3]
+  });  
+  new Worker(__filename, {
+    workerData: [1,3,4,3]
+  }); 
+} else {
+  console.log(`Worker! Process ID: ${process.pid}`);
+  console.log(`${workerData}`)
+}
+```
+
+<img src="Performance optimaztion.assets/Screen Shot 2022-02-24 at 2.19.08 PM.png" alt="Screen Shot 2022-02-24 at 2.19.08 PM" style="zoom:33%;" />
+
+All of the code above happens inside one process.
