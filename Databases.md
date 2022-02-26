@@ -185,6 +185,9 @@ planets.find({
   	keplerName: 'Kepler-62 f',
 	},'-keplerName anotherField'
 )
+
+//find all records
+planets.find({})
 ```
 
 ### Upsert
@@ -227,3 +230,61 @@ Note: With Mongo, no need to save the creation date of documents, because that's
 
 This key-value contains the internal revision of the document. It is the version of Schema
 
+## Referential Integrity (SQL)
+
+<img src="Databases.assets/Referential_integrity_broken.png" alt="Referential_integrity_broken"  />
+
+SQL database will avoid a record reference another record which does not exist.
+
+MongoDB doesn't have this feature, we need to do validation make it the same way
+
+Solution: import the referenced model, do validation and throw error if cases against referential integrity happened
+
+```js
+const launches = require('./launches.mongo')
+const planets = require('./planets.mongo')
+
+const saveLaunch = async (launch) => {
+  const planet = await planets.findOne({
+    keplerName: launch.target,
+  })
+
+  if(!planet) {
+    throw new Error('No matching planet found')
+  }
+
+  await launches.updateOne({
+    flightNumber: launch.flightNumber,
+  },launch,{
+    upsert: true,
+  })
+}
+```
+
+## Auto Increment
+
+Auto Increment is the **downside** of MongoDB
+
+Solution: Avoid auto increment, instead, `findOne()`find the latest then +1
+
+```js
+const getLatestFlightNumber = () => {
+  // -flightNumber means sort by descend order
+  const latestLaunch = await launches
+    .findOne()
+    .sort("-flightNumber")
+  if(!latestLaunch) return DEFAULT_FLIGHT_NUMBER
+  return latestLaunch.flightNumber;
+}
+//Then when add new flight, save flightNumber as latestFlightNumber+1
+```
+
+## Model:Update methods
+
+<img src="Databases.assets/Screen Shot 2022-02-27 at 2.52.55 AM.png" alt="Screen Shot 2022-02-27 at 2.52.55 AM" style="zoom:50%;" />
+
+
+
+# Resources
+
+[Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
