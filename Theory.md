@@ -280,3 +280,33 @@ describe('Test GET /launches', () => {
 })
 ```
 
+# Testing with Node with Mongo
+
+in server `package.json`
+
+```json
+"jest": {
+	"testEnvironment": "node"
+}
+```
+
+connect and disconnect database inside `beforeAll()` and `afterAll()` functions
+
+```js
+const { 
+    mongoConnect,
+    mongoDisconnect,
+ } = require('../../services/mongo');
+
+describe('Launches API', () => {
+    beforeAll(async() => {
+        await mongoConnect();
+    });
+
+    afterAll(async () => {
+        await mongoDisconnect();
+    });
+  //all other tests here
+}
+```
+
