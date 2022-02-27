@@ -281,7 +281,58 @@ const getLatestFlightNumber = () => {
 
 ## Model:Update methods
 
-<img src="Databases.assets/Screen Shot 2022-02-27 at 2.52.55 AM.png" alt="Screen Shot 2022-02-27 at 2.52.55 AM" style="zoom:50%;" />
+`updateOne()` returns:
+
+```js
+{
+  "acknowledged": true,// Boolean indicating everything went smoothly.
+  "modifiedCount": 1,// Number of documents modified
+  "upsertedId": null,// null or an id containing a document that had to be upserted.
+  "upsertedCount": 0,// Number indicating how many documents had to be upserted. Will either be 0 or 1.
+  "matchedCount": 1// Number of documents matched
+}
+```
+
+If we want to return document, use `findOneAndUpdate()` , it returns original document
+
+To return the new updated document, add `{new:true}`as option:
+
+```js
+const aborted = await launchesDatabase.update({
+    flightNumber:launchId,
+  }, {
+    upcoming: false,
+    success: false,
+  },{
+    new:true
+  })
+```
+
+aborted will be:
+
+```json
+{
+  "_id": "621ad2847f913ddfc7c51843",
+  "flightNumber": 114,
+  "__v": 0,
+  "customers": [
+    "KAI",
+    "MASA"
+  ],
+  "launchDate": "2030-01-16T13:00:00.000Z",
+  "mission": "KAI1234",
+  "rocket": "KAI Experimental IS1",
+  "success": false,
+  "target": "Kepler-442 b",
+  "upcoming": false
+}
+```
+
+
+
+
+
+
 
 
 
