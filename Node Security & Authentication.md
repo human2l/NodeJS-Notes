@@ -152,3 +152,52 @@ iat: issued at. It is the time and date the JWT was created, can be used i.e. ho
 # OAuth
 
 <img src="Node Security & Authentication.assets/Screen Shot 2022-03-01 at 10.33.34 PM.png" alt="Screen Shot 2022-03-01 at 10.33.34 PM" style="zoom:50%;" />
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 8.44.42 AM.png" alt="Screen Shot 2022-03-02 at 8.44.42 AM" style="zoom:50%;" />
+
+## Register with the google authorization server
+
+To enable google as authorization server:
+
+1. go to https://console.cloud.google.com
+2. Select or create new application. i.e. Node Application
+3. Go to sidebar -> APIs and services -> Credentials
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.10.15 AM.png" alt="Screen Shot 2022-03-02 at 9.10.15 AM" style="zoom:50%;" />
+
+4. Create Credentials -> OAuth client ID
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.13.07 AM.png" alt="Screen Shot 2022-03-02 at 9.13.07 AM" style="zoom:50%;" />
+
+5. Configure consent screen -> External (or Internal only with users inside google workplace)
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.15.13 AM.png" alt="Screen Shot 2022-03-02 at 9.15.13 AM" style="zoom:50%;" />
+
+6. Add info of OAuth consent screen
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.18.33 AM.png" alt="Screen Shot 2022-03-02 at 9.18.33 AM" style="zoom:50%;" />
+
+7. Select scope (what user's data will be access by our app)
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.22.16 AM.png" alt="Screen Shot 2022-03-02 at 9.22.16 AM" style="zoom:50%;" />
+
+8. Add testing users (or not)
+
+   <img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.25.30 AM.png" alt="Screen Shot 2022-03-02 at 9.25.30 AM" style="zoom:50%;" />
+
+9. Check summary and click "Back To Dashboard" button
+10. Publish App
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.28.34 AM.png" alt="Screen Shot 2022-03-02 at 9.28.34 AM" style="zoom:50%;" />
+
+11. Redo Step 4. Create Credentials -> OAuth client ID
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.13.07 AM.png" alt="Screen Shot 2022-03-02 at 9.13.07 AM" style="zoom:50%;" />
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.34.59 AM.png" alt="Screen Shot 2022-03-02 at 9.34.59 AM" style="zoom:40%;" />
+
+Note: Authorised redirect URI is where " `Authorization Code Response` to" in OAuth flow chart
+
+12. Now we have our Client ID and Client Secret (Both can be seen in credential later)
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.38.24 AM.png" alt="Screen Shot 2022-03-02 at 9.38.24 AM" style="zoom:33%;" />
