@@ -6,6 +6,8 @@
 
 POST /messages: add a new message into messages collection
 
+Note: Some APIs using POST to allow user send a json as search queries to "GET" data from server. i.e. POST /messages/query
+
 PUT /messages/15: add or replace the message(ID:15) with current message we uploaded
 
 Note: nomally we won't POST /message/15, because it partial make change to message 15, we replace it entirly by our new submitted message
