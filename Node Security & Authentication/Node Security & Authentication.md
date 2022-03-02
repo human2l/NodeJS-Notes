@@ -201,3 +201,110 @@ Note: Authorised redirect URI is where " `Authorization Code Response` to" in OA
 12. Now we have our Client ID and Client Secret (Both can be seen in credential later)
 
 <img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 9.38.24 AM.png" alt="Screen Shot 2022-03-02 at 9.38.24 AM" style="zoom:33%;" />
+
+## Passport.js
+
+https://www.passportjs.org/
+
+A thrid-party node package provide multiply solutions for authentication.
+
+`npm install passport-google-oauth20` and `npm install passport`
+
+#### server.js
+
+```js
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const express = require('express');
+const passport = require('passport');
+const { Strategy } = require('passport-google-oauth20');
+
+
+require('dotenv').config();
+
+const PORT = 3000;
+
+const config = {
+  CLIENT_ID: process.env.CLIENT_ID,
+  CLIENT_SECRET: process.env.CLIENT_SECRET
+};
+
+const AUTH_OPTIONS = {
+  callbackURL: '/auth/google/callback',
+  clientID: config.CLIENT_ID,
+  clientSecret: config.CLIENT_SECRET,
+};
+
+function verifyCallback(accessToken, refreshToken, profile, done) {
+  console.log('Google profile', profile);
+  done(null, profile);
+}
+
+passport.use(new Strategy(AUTH_OPTIONS, verifyCallback));
+
+const app = express();
+
+app.use(passport.initialize())
+
+app.get('/auth/google', 
+  passport.authenticate('google', {
+    scope: ['email'],
+  }));
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', {
+    failureRedirect: '/failure',
+    successRedirect: '/',
+    session: false,
+  }), 
+  (req, res) => {
+    console.log('Google called us back!');
+  }
+);
+
+https.createServer({
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem'),
+}, app).listen(PORT, () => {
+  console.log(`Listening on port ${PORT}...`);
+});
+```
+
+Passport.js handles below 3 steps for us.
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 12.55.31 PM.png" alt="Screen Shot 2022-03-02 at 12.55.31 PM" style="zoom:50%;" />
+
+AccessToken will be passed from google to `verifyCallBack() `
+
+## Cookies
+
+Cookies are a way of storing data in browser that gets sent to the server whenever a request made against it. They are sent automatically.
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-02 at 1.09.14 PM.png" alt="Screen Shot 2022-03-02 at 1.09.14 PM" style="zoom:50%;" />
+
+## Sessions
+
+We need sessions for the user data when we want to keep track of state that shouldn't be changed by the user in their browser directly. Unlike database, sessions are short lived until user quit or log out.
+
+i.e. shopping cart might be in a session while order history might live in a database
+
+Two ways of storing session data:
+
+#### Server-side sessions (using Stateful cookies): 
+
+user data lives in the server on a database, the data would get looked up for each request that the user makes and potentially deleted if the user logs out or quit their browser.
+
+Server will look into database to check if the session is in database. Additional database read and write.
+
+#### Client-side sessions (using Stateless cookies)(most cases):
+
+Store session data in the browser cookies. (In fact, cookies are almost always used to implement sessions).
+
+Server can encrypt or sign the user's cookies using a secret key before sent to the clients. Then server set the authenticated user an ID and send back the ID. Server using the secret key will know if the cookie has been tampered or not.
+
+## express-session vs cookie-session
+
+both are part of the Express.js organization and Express.js project on Github
+
+#### 
