@@ -307,4 +307,143 @@ Server can encrypt or sign the user's cookies using a secret key before sent to 
 
 both are part of the Express.js organization and Express.js project on Github
 
-#### 
+#### express-session for server-side sessions
+
+cookies only save session ID in it, session data (userID and permissions) save into database
+
+#### cookie-session for client-side sessions
+
+cookies have all of session data in it. No database required. Good for load-balanced scenarios(i.e. node cluster)
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-04 at 9.12.45 PM.png" alt="Screen Shot 2022-03-04 at 9.12.45 PM" style="zoom:40%;" />
+
+#### server.js
+
+```js
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const express = require('express');
+const helmet = require('helmet');
+const passport = require('passport');
+const { Strategy } = require('passport-google-oauth20');
+const cookieSession = require('cookie-session');
+const { verify } = require('crypto');
+
+require('dotenv').config();
+
+const PORT = 3000;
+
+const config = {
+  CLIENT_ID: process.env.CLIENT_ID,
+  CLIENT_SECRET: process.env.CLIENT_SECRET,
+  COOKIE_KEY_1: process.env.COOKIE_KEY_1,
+  COOKIE_KEY_2: process.env.COOKIE_KEY_2,
+};
+
+const AUTH_OPTIONS = {
+  callbackURL: '/auth/google/callback',
+  clientID: config.CLIENT_ID,
+  clientSecret: config.CLIENT_SECRET,
+};
+
+function verifyCallback(accessToken, refreshToken, profile, done) {
+  console.log('Google profile', profile);
+  done(null, profile);
+}
+
+passport.use(new Strategy(AUTH_OPTIONS, verifyCallback));
+
+// Save the session to the cookie
+// serialize the profile object from google with cookie key
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// Read the session from the cookie
+passport.deserializeUser((id, done) => {
+  //code to lookup in our database to handle permission with this id
+  // User.findById(id).then(user => {
+  //   done(null, user);
+  // });
+  done(null, id);
+  //now the "id" is attached to the request as req.user
+});
+
+const app = express();
+
+app.use(helmet());
+
+app.use(cookieSession({
+  name: 'session',
+  maxAge: 24 * 60 * 60 * 1000,
+  keys: [ config.COOKIE_KEY_1, config.COOKIE_KEY_2 ],
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+function checkLoggedIn(req, res, next) { 
+  console.log('Current user is:', req.user);
+  //req.isAuthenticated() is a passport.js function to check authentication
+  const isLoggedIn = req.isAuthenticated() && req.user;
+  if (!isLoggedIn) {
+    return res.status(401).json({
+      error: 'You must log in!',
+    });
+  }
+  next();
+}
+
+app.get('/auth/google', 
+  passport.authenticate('google', {
+    scope: ['email'],
+  }));
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', {
+    failureRedirect: '/failure',
+    successRedirect: '/',
+    session: true,
+  }), 
+  (req, res) => {
+    console.log('Google called us back!');
+  }
+);
+
+app.get('/auth/logout', (req, res) => {
+  req.logout(); //Removes req.user and clears any logged in session
+  //after logout, cookie value of session will be a base64 encoded {passport:{}} object
+  return res.redirect('/');
+});
+
+app.get('/secret', checkLoggedIn, (req, res) => {
+  return res.send('Your personal secret value is 42!');
+});
+
+app.get('/failure', (req, res) => {
+  return res.send('Failed to log in!');
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+https.createServer({
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem'),
+}, app).listen(PORT, () => {
+  console.log(`Listening on port ${PORT}...`);
+});
+```
+
+<img src="Node Security & Authentication.assets/Screen Shot 2022-03-05 at 12.37.46 AM.png" alt="Screen Shot 2022-03-05 at 12.37.46 AM" style="zoom:50%;" />
+
+session: a base64 encoded json set by passport.js `{"passport":{"user":"106920490813302680531"}}`
+
+session.sig is the signature of the user encrypted by `COOKIE_KEY`
+
+If we tamper the user data in session, passport.js will not authenticate because it is not fit the session.sig
+
+# Resources
+
+[**OWASP Node.js Security Cheat Sheet**](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html)
