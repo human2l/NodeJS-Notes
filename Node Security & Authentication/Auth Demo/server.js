@@ -62,7 +62,7 @@ app.use(passport.session());
 
 function checkLoggedIn(req, res, next) { 
   console.log('Current user is:', req.user);
-  console.log(req._passport)
+  //req.isAuthenticated() is a passport.js function to check authentication
   const isLoggedIn = req.isAuthenticated() && req.user;
   if (!isLoggedIn) {
     return res.status(401).json({
@@ -90,6 +90,7 @@ app.get('/auth/google/callback',
 
 app.get('/auth/logout', (req, res) => {
   req.logout(); //Removes req.user and clears any logged in session
+  //after logout, cookie value of session will be a base64 encoded {passport:{}} object
   return res.redirect('/');
 });
 
