@@ -35,3 +35,106 @@ Not suitable cases:
 
 # Github Actions
 
+## Build Pipelines
+
+Create `/.github/workflows/node.yml` in project folder
+
+#### node.yml
+
+```yml
+name: MASA Project CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js version 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: npm install
+      - run: npm run build --prefix client
+```
+
+<img src="CICD.assets/Screen Shot 2022-03-06 at 4.11.19 PM.png" alt="Screen Shot 2022-03-06 at 4.11.19 PM" style="zoom:50%;" />
+
+## Test Pipeline
+
+```yml
+name: MASA Project CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    env:
+      # set CI to true will let create-react-app notified to turn off watch mode of testing
+      CI: true
+      #PORT: 9000
+    strategy:
+      matrix:
+        # run on both 14 and 16 version of node in parallel
+        node-version: [14.x, 16.x]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js version ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm run build --prefix client
+      - run: npm test
+```
+
+## Add mock database for testing
+
+Github Actions Marketplace
+
+https://github.com/marketplace/actions/
+
+<img src="CICD.assets/Screen Shot 2022-03-06 at 9.54.22 PM.png" alt="Screen Shot 2022-03-06 at 9.54.22 PM" style="zoom:50%;" />
+
+```yml
+name: MASA Project CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    env:
+      # set CI to true will let create-react-app notified to turn off watch mode of testing
+      CI: true
+      #PORT: 9000
+      #act the same as MONGO_URL in local .env file
+      MONGO_URL: mongodb://localhost/masa
+    strategy:
+      matrix:
+        # run on both 14 and 16 version of node in parallel
+        node-version: [14.x, 16.x]
+        mongodb-version: ['5.0']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js version ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: MongoDB in GitHub Actions
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+      - run: npm install
+      - run: npm run build --prefix client
+      - run: npm test
+```
+
