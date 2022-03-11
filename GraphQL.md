@@ -38,3 +38,214 @@ Downside: The flexibility of the query language adds some complexity, might not 
 <img src="GraphQL.assets/Screen Shot 2022-03-10 at 8.48.46 PM.png" alt="Screen Shot 2022-03-10 at 8.48.46 PM" style="zoom:30%;" />
 
 <img src="GraphQL.assets/Screen Shot 2022-03-10 at 8.52.56 PM.png" alt="Screen Shot 2022-03-10 at 8.52.56 PM" style="zoom:30%;" />
+
+# GraphQL in Node
+
+`npm i graphql express-graphql`
+
+```js
+const express = require('express');
+const { buildSchema } = require('graphql');
+const { graphqlHTTP } = require('express-graphql');
+
+//"!" means required
+//there is no built in "date" type in graphql
+//use OrderItem because we may order one product multiple times
+const schema = buildSchema(`
+    type Query {
+        products: [Product]
+        orders: [Order]
+    }
+
+    type Product {
+        id: ID!
+        description: String!
+        reviews: [Review]
+        price: Float!
+    }
+
+    type Review {
+        rating: Int!
+        comment: String
+    }
+
+    type Order {
+        date: String!
+        subtotal: Float!
+        items: [OrderItem]
+    }
+
+    type OrderItem {
+        product: Product!
+        quantity: Int!
+    }
+`)
+
+
+const root = {
+    products: [
+        {
+            id: 'redshoe',
+            description: 'Red Shoe',
+            price: 42.12
+        },
+        {
+            id: 'bluejean',
+            description: 'Blue Jeans',
+            price: 55.55,
+        }
+    ],
+    orders: [
+        {
+            date: '2005-05-05',
+            subtotal: 90.22,
+            items: [
+                {
+                    product: {
+                        id: 'redshoe',
+                        description: 'Old Red Shoe',
+                        price: 45.11,
+                    },
+                    quantity: 2,
+                }
+            ]
+        }
+    ]
+}
+
+const app = express();
+
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true,// make a GET request to /graphql to get into graphiql IDE
+}))
+
+app.listen(3000, () => {
+    console.log('Running GraphQL server...')
+})
+```
+
+<img src="GraphQL.assets/Screen Shot 2022-03-11 at 7.49.12 PM.png" alt="Screen Shot 2022-03-11 at 7.49.12 PM" style="zoom:50%;" />
+
+## GraphQL Tools
+
+`npm i @graphql-tools/schema`
+
+` npm i @graphql-tools/load-files`
+
+<img src="GraphQL.assets/Screen Shot 2022-03-11 at 8.10.14 PM.png" alt="Screen Shot 2022-03-11 at 8.10.14 PM" style="zoom:50%;" />
+
+#### server.js
+
+```js
+const path = require('path');
+const express = require('express');
+const { graphqlHTTP } = require('express-graphql');
+
+const { loadFilesSync } = require('@graphql-tools/load-files')
+const { makeExecutableSchema } = require('@graphql-tools/schema')
+
+//"**" means look into any directories or subdirectories
+const typesArray = loadFilesSync(path.join(__dirname, '**/*.graphql'))
+
+const schema = makeExecutableSchema({
+    typeDefs: typesArray
+})
+
+const root = {
+    products: require('./products/products.model'),
+    orders: require('./orders/orders.model')
+}
+
+const app = express();
+
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true,// make a GET request to /graphql to get into graphiql IDE
+}))
+
+app.listen(3000, () => {
+    console.log('Running GraphQL server...')
+})
+
+```
+
+#### orders/orders.graphql
+
+```
+type Query {
+    orders: [Order]
+}
+type Order {
+    date: String!
+    subtotal: Float!
+    items: [OrderItem]
+}
+
+type OrderItem {
+    product: Product!
+    quantity: Int!
+}
+```
+
+#### products/products.graphql
+
+```
+type Query {
+    products: [Product]
+}
+type Product {
+    id: ID!
+    description: String!
+    reviews: [Review]
+    price: Float!
+}
+
+type Review {
+    rating: Int!
+    comment: String
+}
+```
+
+Note: type Query have the both products field and orders field, `loadFilesSync()` will combine them together.
+
+#### orders/order.model.js
+
+```
+module.exports = [
+    {
+        date: '2005-05-05',
+        subtotal: 90.22,
+        items: [
+            {
+                product: {
+                    id: 'redshoe',
+                    description: 'Old Red Shoe',
+                    price: 45.11,
+                },
+                quantity: 2,
+            }
+        ]
+    }
+]
+```
+
+#### products/product.model.js
+
+```
+module.exports = [
+    {
+        id: 'redshoe',
+        description: 'Red Shoe',
+        price: 42.12
+    },
+    {
+        id: 'bluejean',
+        description: 'Blue Jeans',
+        price: 55.55,
+    }
+]
+```
+
