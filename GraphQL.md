@@ -213,7 +213,7 @@ Note: type Query have the both products field and orders field, `loadFilesSync()
 
 #### orders/order.model.js
 
-```
+```js
 module.exports = [
     {
         date: '2005-05-05',
@@ -234,7 +234,7 @@ module.exports = [
 
 #### products/product.model.js
 
-```
+```js
 module.exports = [
     {
         id: 'redshoe',
@@ -248,4 +248,6 @@ module.exports = [
     }
 ]
 ```
+
+## Resolver
 
