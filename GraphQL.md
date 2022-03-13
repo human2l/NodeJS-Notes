@@ -251,3 +251,28 @@ module.exports = [
 
 ## Resolver
 
+```js
+const typesArray = loadFilesSync(path.join(__dirname, '**/*.graphql'))
+
+const schema = makeExecutableSchema({
+    typeDefs: typesArray,
+    resolvers: {
+        Query: {
+          //parent is the passed in values, i.e. rootValue
+          //args used for parameterized queries,i.e. filter the result
+          //context used for data that shared among different resolvers.i.e. pass down authentication data to every resolvers
+          //info used for current state of operation
+            products: async (parent, args, context, info) => {
+                console.log('Getting the products...')
+                const product = await Promise.resolve(parent.products)
+                return product;
+            },
+            orders: (parent) => {
+                console.log('Getting the orders...')
+                return parent.orders
+            }
+        }
+    }
+})
+```
+
