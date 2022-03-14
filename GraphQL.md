@@ -513,3 +513,79 @@ module.exports = {
 Note: use `mutation` in query instead of `query`
 
 <img src="GraphQL.assets/Screen Shot 2022-03-14 at 1.04.07 PM.png" alt="Screen Shot 2022-03-14 at 1.04.07 PM" style="zoom:50%;" />
+
+## GraphQL operations
+
+1. querys
+2. mutations
+3. subscriptions
+
+Subscriptions allow you to push updates from the server to subscribing clients.
+
+# Apollo
+
+Two main Apollo components: Apollo Server & Apollo Client
+
+## Apollo Client
+
+It comes with added benefits like caching queries, handling loading states and errors and keep data synced with server.
+
+It handles connecting components with the data from graphql query without hooking things up manually.
+
+## Apollo Server
+
+It can work with almost any other popular node framework.
+
+It helps run and deploy graphql code to serverless environments like Amazon's Lambda Service
+
+### [Apollo Documents](https://www.apollographql.com/docs/apollo-server/integrations/middleware/)
+
+## Build Apollo Server with Node.js
+
+`npm uninstall express-graphql   `
+
+`npm install apollo-server-express`
+
+#### server.js
+
+```javascript
+const path = require("path");
+const express = require("express");
+
+const { ApolloServer } = require("apollo-server-express");
+
+const { loadFilesSync } = require("@graphql-tools/load-files");
+const { makeExecutableSchema } = require("@graphql-tools/schema");
+
+//"**" means look into any directories or subdirectories
+const typesArray = loadFilesSync(path.join(__dirname, "**/*.graphql"));
+const resolversArray = loadFilesSync(path.join(__dirname, "**/*.resolvers.js"));
+
+const startApolloServer = async () => {
+  const app = express();
+
+  const schema = makeExecutableSchema({
+    typeDefs: typesArray,
+    resolvers: resolversArray,
+  });
+
+  const server = new ApolloServer({
+    schema,
+  });
+
+  await server.start();
+  server.applyMiddleware({ app, path: "/graphql" });
+
+  app.listen(3000, () => {
+    console.log("Running GraphQL server...");
+  });
+};
+
+startApolloServer();
+```
+
+#### localhost:3000
+
+<img src="GraphQL.assets/Screen Shot 2022-03-14 at 1.24.18 PM.png" alt="Screen Shot 2022-03-14 at 1.24.18 PM" style="zoom:50%;" />
+
+<img src="GraphQL.assets/Screen Shot 2022-03-14 at 1.31.48 PM.png" alt="Screen Shot 2022-03-14 at 1.31.48 PM" style="zoom:50%;" />
