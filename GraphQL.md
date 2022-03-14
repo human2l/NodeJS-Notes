@@ -276,3 +276,72 @@ const schema = makeExecutableSchema({
 })
 ```
 
+### Modularizing Resolvers
+
+<img src="GraphQL.assets/Screen Shot 2022-03-14 at 11.40.14 AM.png" alt="Screen Shot 2022-03-14 at 11.40.14 AM" style="zoom:33%;" />
+
+#### Server.js
+
+```js
+//----------------------------------
+//"**" means look into any directories or subdirectories
+const typesArray = loadFilesSync(path.join(__dirname, '**/*.graphql'))
+const resolversArray = loadFilesSync(path.join(__dirname, '**/*.resolvers.js'))
+
+const schema = makeExecutableSchema({
+    typeDefs: typesArray,
+    resolvers: resolversArray,
+})
+
+const app = express();
+
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    graphiql: true,// make a GET request to /graphql to get into graphiql IDE
+}))
+//-----------------------------------
+```
+
+#### orders.model.js
+
+```js
+const orders = [
+    {
+        date: '2005-05-05',
+        subtotal: 90.22,
+        items: [
+            {
+                product: {
+                    id: 'redshoe',
+                    description: 'Old Red Shoe',
+                    price: 45.11,
+                },
+                quantity: 2,
+            }
+        ]
+    }
+]
+
+const getAllOrders = () => {
+    return orders;
+}
+
+module.exports = {
+    getAllOrders
+};
+```
+
+#### orders.resolver.js
+
+```js
+const ordersModel = require('./orders.model');
+
+module.exports = {
+    Query: {
+        orders: () => {
+            return ordersModel.getAllOrders();
+        }
+    }
+};
+```
+
