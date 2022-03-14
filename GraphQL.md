@@ -426,3 +426,90 @@ module.exports = {
 };
 ```
 
+<img src="GraphQL.assets/Screen Shot 2022-03-14 at 12.12.56 PM.png" alt="Screen Shot 2022-03-14 at 12.12.56 PM" style="zoom:50%;" />
+
+## Mutations
+
+When we do changes of the data on server, we use mutations
+
+#### products.graphql
+
+```
+type Mutation {
+  addNewProduct(id: ID!, description: String!, price: Float!): Product
+  addNewProductReview(id: ID!, rating: Int!, comment: String): Review
+}
+```
+
+#### products.model.js
+
+```js
+//-------------------
+const addNewProduct = (id, description, price) => {
+  const newProduct = {
+    id,
+    price,
+    description,
+    reviews: [],
+  };
+  products.push(newProduct);
+  return newProduct;
+};
+
+const addNewProductReview = (id, rating, comment) => {
+  const matchedProduct = getProductById(id);
+  if (!matchedProduct) return;
+  const newProductReview = {
+    rating,
+    comment,
+  };
+  matchedProduct.reviews.push(newProductReview);
+  return newProductReview;
+};
+
+module.exports = {
+  getAllProducts,
+  getProductsByPrice,
+  getProductById,
+  addNewProduct,
+  addNewProductReview,
+};
+```
+
+#### products.resolvers.js
+
+```js
+const productsModel = require("./products.model");
+
+module.exports = {
+  Query: {
+    products: () => {
+      return productsModel.getAllProducts();
+    },
+    productsByPrice: (_, args) => {
+      return productsModel.getProductsByPrice(args.min, args.max);
+    },
+    product: (_, args) => {
+      return productsModel.getProductById(args.id);
+    },
+  },
+  Mutation: {
+    addNewProduct: (_, args) => {
+      return productsModel.addNewProduct(args.id, args.description, args.price);
+    },
+    addNewProductReview: (_, args) => {
+      return productsModel.addNewProductReview(
+        args.id,
+        args.rating,
+        args.comment
+      );
+    },
+  },
+};
+```
+
+<img src="GraphQL.assets/Screen Shot 2022-03-14 at 1.02.56 PM.png" alt="Screen Shot 2022-03-14 at 1.02.56 PM" style="zoom:50%;" />
+
+Note: use `mutation` in query instead of `query`
+
+<img src="GraphQL.assets/Screen Shot 2022-03-14 at 1.04.07 PM.png" alt="Screen Shot 2022-03-14 at 1.04.07 PM" style="zoom:50%;" />
