@@ -1,12 +1,12 @@
 const products = [
   {
-    id: "redshoe",
-    description: "Red Shoe",
+    id: "redshoes",
+    description: "Red Shoes",
     price: 42.12,
     reviews: [],
   },
   {
-    id: "bluejean",
+    id: "bluejeans",
     description: "Blue Jeans",
     price: 55.55,
     reviews: [],
@@ -40,9 +40,21 @@ const addNewProduct = (id, description, price) => {
   return newProduct;
 };
 
+const addNewProductReview = (id, rating, comment) => {
+  const matchedProduct = getProductById(id);
+  if (!matchedProduct) return;
+  const newProductReview = {
+    rating,
+    comment,
+  };
+  matchedProduct.reviews.push(newProductReview);
+  return newProductReview;
+};
+
 module.exports = {
   getAllProducts,
   getProductsByPrice,
   getProductById,
   addNewProduct,
+  addNewProductReview,
 };
