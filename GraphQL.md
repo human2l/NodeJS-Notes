@@ -345,3 +345,84 @@ module.exports = {
 };
 ```
 
+### Filtering with Queries and Resolvers
+
+#### products.resolvers.js
+
+```js
+const productsModel = require('./products.model');
+
+module.exports = {
+    Query: {
+        products: () => {
+            return productsModel.getAllProducts();
+        },
+        productsByPrice: (_, args) => {
+            return productsModel.getProductsByPrice(args.min, args.max)
+        }
+    }
+};
+```
+
+Note: use  `_` as a placeholder for args that we don't use, code above we don't use "parent", so we use "_" instead
+
+#### products.graphql
+
+```
+type Query {
+    products: [Product]
+    productsByPrice(min: Float!, max: Float!): [Product]
+    product(id: String!): Product
+}
+type Product {
+    id: ID!
+    description: String!
+    reviews: [Review]
+    price: Float!
+}
+
+type Review {
+    rating: Int!
+    comment: String
+}
+```
+
+#### products.model.js
+
+```js
+const products = [
+    {
+        id: 'redshoe',
+        description: 'Red Shoe',
+        price: 42.12
+    },
+    {
+        id: 'bluejean',
+        description: 'Blue Jeans',
+        price: 55.55,
+    }
+]
+
+const getAllProducts = () => {
+    return products
+}
+
+const getProductsByPrice = (min, max) => {
+    return products.filter((product) => {
+        return product.price >= min && product.price <= max
+    })
+}
+
+const getProductById = (id) => {
+    return products.find ((product)=>{
+        return product.id === id;
+    })
+}
+
+module.exports = {
+    getAllProducts,
+    getProductsByPrice,
+    getProductById,
+};
+```
+
