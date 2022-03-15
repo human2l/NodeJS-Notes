@@ -127,6 +127,12 @@ Note:` socket.id` will change every time when reconnected after disconnection
 
 ## Broadcast Events
 
+`socket.broadcast.emit`: to all clients except the sender
+
+`io.emit`: to all clients
+
+details see Resources section below
+
 #### server.js
 
 ```js
@@ -228,6 +234,79 @@ io.on("connection", (socket) => {
   })
 });
 ```
+
+## Ball Logic
+
+#### script.js
+
+```js
+// Reset Ball to Center
+function ballReset() {
+  ballX = width / 2;
+  ballY = height / 2;
+  speedY = 3;
+  socket.emit('ballMove', {
+    ballX,
+    ballY,
+    score,
+  })
+}
+
+// Adjust Ball Movement
+function ballMove() {
+  // Vertical Speed
+  ballY += speedY * ballDirection;
+  // Horizontal Speed
+  if (playerMoved) {
+    ballX += speedX;
+  }
+  socket.emit('ballMove', {
+    ballX,
+    ballY,
+    score
+  })
+}
+
+// Called Every Frame
+function animate() {
+  //allows only referee do the calculation
+  if (isReferee){
+    ballMove();
+    ballBoundaries();
+  }
+  renderCanvas();
+  window.requestAnimationFrame(animate);
+}
+
+socket.on('ballMove', (ballData) => {
+  ({ ballX, ballY, score } = ballData)
+})
+```
+
+#### server.js
+
+```js
+io.on("connection", (socket) => {
+  console.log("a user connected", socket.id);
+  socket.on("ready", () => {
+    console.log("Player ready", socket.id);
+    readyPlayerCount++;
+    if (readyPlayerCount === 2) {
+      io.emit("startGame", socket.id);
+    }
+  });
+
+  socket.on("paddleMove", (paddleData) => {
+    socket.broadcast.emit("paddleMove", paddleData);
+  });
+
+  socket.on('ballMove', (ballData) => {
+      socket.broadcast.emit('ballMove', ballData)
+  })
+});
+```
+
+
 
 
 
