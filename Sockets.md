@@ -337,7 +337,87 @@ io.on("connection", (socket) => {
 
 ## Using Socket.io with Express
 
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 8.07.05 PM.png" alt="Screen Shot 2022-03-15 at 8.07.05 PM" style="zoom:50%;" />
 
+move "io" logic in `sockets.js`
+
+#### sockets.js
+
+```js
+let readyPlayerCount = 0;
+
+const listen = (io) => {
+  io.on("connection", (socket) => {
+    console.log("a user connected", socket.id);
+    socket.on("ready", () => {
+      console.log("Player ready", socket.id);
+      readyPlayerCount++;
+      if (readyPlayerCount % 2 === 0) {
+        io.emit("startGame", socket.id);
+      }
+    });
+
+    socket.on("paddleMove", (paddleData) => {
+      socket.broadcast.emit("paddleMove", paddleData);
+    });
+
+    socket.on("ballMove", (ballData) => {
+      socket.broadcast.emit("ballMove", ballData);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log(`Client ${socket.id} disconnected: ${reason}`);
+    });
+  });
+};
+
+module.exports = {
+  listen,
+};
+```
+
+remove url in script.js: `const socket = io('http://localhost:3000')` to `const socket = io()`
+
+#### api.js
+
+```js
+const express = require("express");
+const path = require("path");
+
+const api = express();
+
+api.use(express.static(path.join(__dirname, "public")));
+
+api.use("/", express.static("index.html"));
+
+module.exports = api;
+```
+
+#### server.js
+
+```js
+const apiServer = require("./api");
+const http = require("http");
+const io = require("socket.io");
+
+const httpServer = http.createServer(apiServer);
+const socketServer = io(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+const sockets = require("./sockets");
+
+const PORT = 3000;
+
+httpServer.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}...`);
+});
+
+sockets.listen(socketServer);
+```
 
 
 
