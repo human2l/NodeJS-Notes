@@ -419,11 +419,29 @@ httpServer.listen(PORT, () => {
 sockets.listen(socketServer);
 ```
 
+## Namespaces
 
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 8.21.17 PM.png" alt="Screen Shot 2022-03-15 at 8.21.17 PM" style="zoom:50%;" />
 
+#### script.js
 
+```js
+const socket = io('/pong');
+```
 
+#### sockets.js
 
+```js
+const listen = (io) => {
+  const pongNamespace = io.of("/pong");
+  pongNamespace.on("connection", (socket) => {
+    //--------------------
+    
+  const anothergameNamespace = io.of("/anothergame");
+    //-------------
+```
+
+## Rooms
 
 
 
