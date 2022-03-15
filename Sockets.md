@@ -42,3 +42,233 @@ Popular WebSocket library:
 <img src="Sockets.assets/Screen Shot 2022-03-15 at 12.52.17 PM.png" alt="Screen Shot 2022-03-15 at 12.52.17 PM" style="zoom:50%;" />
 
 Server can notify multiple clients with the newly updated messages
+
+# Multiplayer Pong Game
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 3.32.40 PM.png" alt="Screen Shot 2022-03-15 at 3.32.40 PM" style="zoom:50%;" />
+
+Let one of the player as referee which handles the calculation of most of the game data, this makes the server a thin server, which is lightweight and allow us to potentially expand our game with more complicated logic.
+
+## Connecting to socket.io
+
+`npm i --save socket.io`
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 3.47.01 PM.png" alt="Screen Shot 2022-03-15 at 3.47.01 PM" style="zoom:50%;" />
+
+#### server.js
+
+```js
+const server = require("http").createServer();
+//allow CORS
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+const PORT = 3000;
+
+server.listen(PORT);
+console.log(`Listening on port ${PORT}...`);
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+});
+```
+
+**CORS**: Read more about socket.io and CORS at https://socket.io/docs/v4/handling-cors/
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 3.46.23 PM.png" alt="Screen Shot 2022-03-15 at 3.46.23 PM" style="zoom:30%;" />
+
+Add one of these CDN link to index.html
+
+#### index.html
+
+```html
+<body>
+    <!-- Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js" integrity="sha512-MgkNs0gNdrnOM7k+0L+wgiRc5aLgl74sJQKbIWegVIMvVGPc1+gc1L2oK9Wf/D9pq58eqIJAxOonYPVE5UwUFA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="javascripts/script.js"></script>
+</body>
+```
+
+After start the server, open index.html in browser, socket.io will swich the protocol to websocket for us
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 3.58.58 PM.png" alt="Screen Shot 2022-03-15 at 3.58.58 PM" style="zoom:50%;" />
+
+## Identifying connected clients
+
+Base on socket.io, each socket connection has an ID. We use socket id as player id
+
+#### server.js
+
+```js
+//------------------------
+io.on("connection", (socket) => {
+  console.log("a user connected", socket.id);
+});
+```
+
+#### script.js
+
+```js
+//------------------------
+socket.on("connect", () => {
+  console.log("Connected as...", socket.id);
+});
+```
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 4.19.17 PM.png" alt="Screen Shot 2022-03-15 at 4.19.17 PM" style="zoom:50%;" />
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 4.19.35 PM.png" alt="Screen Shot 2022-03-15 at 4.19.35 PM" style="zoom:50%;" />
+
+Note:` socket.id` will change every time when reconnected after disconnection
+
+## Broadcast Events
+
+#### server.js
+
+```js
+//--------------------folded
+let readyPlayerCount = 0;
+
+io.on("connection", (socket) => {
+  console.log("a user connected", socket.id);
+  socket.on("ready", () => {
+    console.log("Player ready", socket.id);
+    readyPlayerCount++;
+    if (readyPlayerCount === 2) {
+      io.emit("startGame", socket.id);
+    }
+  });
+});
+```
+
+#### script.js
+
+```js
+//-----------folded
+// Start Game, Reset Everything
+function loadGame() {
+  createCanvas();
+  renderIntro();
+  socket.emit("ready");
+}
+
+loadGame();
+
+socket.on("connect", () => {
+  console.log("Connected as...", socket.id);
+});
+
+socket.on("startGame", (refereeId) => {
+  console.log("Referee is", refereeId);
+});
+```
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 4.37.51 PM.png" alt="Screen Shot 2022-03-15 at 4.37.51 PM" style="zoom:50%;" />
+
+<img src="Sockets.assets/Screen Shot 2022-03-15 at 4.38.03 PM.png" alt="Screen Shot 2022-03-15 at 4.38.03 PM" style="zoom:50%;" />
+
+a
+
+
+
+
+
+
+
+
+
+
+
+# Resources
+
+## [Emit Cheatsheet](https://socket.io/docs/v4/emit-cheatsheet/)
+
+#### Server-side
+
+```js
+io.on("connection", (socket) => {
+
+  // basic emit
+  socket.emit(/* ... */);
+
+  // to all clients in the current namespace except the sender
+  socket.broadcast.emit(/* ... */);
+
+  // to all clients in room1 except the sender
+  socket.to("room1").emit(/* ... */);
+
+  // to all clients in room1 and/or room2 except the sender
+  socket.to(["room1", "room2"]).emit(/* ... */);
+
+  // to all clients in room1
+  io.in("room1").emit(/* ... */);
+
+  // to all clients in room1 and/or room2 except those in room3
+  io.to(["room1", "room2"]).except("room3").emit(/* ... */);
+
+  // to all clients in namespace "myNamespace"
+  io.of("myNamespace").emit(/* ... */);
+
+  // to all clients in room1 in namespace "myNamespace"
+  io.of("myNamespace").to("room1").emit(/* ... */);
+
+  // to individual socketid (private message)
+  io.to(socketId).emit(/* ... */);
+
+  // to all clients on this node (when using multiple nodes)
+  io.local.emit(/* ... */);
+
+  // to all connected clients
+  io.emit(/* ... */);
+
+  // WARNING: `socket.to(socket.id).emit()` will NOT work, as it will send to everyone in the room
+  // named `socket.id` but the sender. Please use the classic `socket.emit()` instead.
+
+  // with acknowledgement
+  socket.emit("question", (answer) => {
+    // ...
+  });
+
+  // without compression
+  socket.compress(false).emit(/* ... */);
+
+  // a message that might be dropped if the low-level transport is not writable
+  socket.volatile.emit(/* ... */);
+
+  // with timeout
+  socket.timeout(5000).emit("my-event", (err) => {
+    if (err) {
+      // the other side did not acknowledge the event in the given delay
+    }
+  });
+});
+```
+
+#### Client-side
+
+```js
+// basic emit
+socket.emit(/* ... */);
+
+// with acknowledgement
+socket.emit("question", (answer) => {
+  // ...
+});
+
+// without compression
+socket.compress(false).emit(/* ... */);
+
+// a message that might be dropped if the low-level transport is not writable
+socket.volatile.emit(/* ... */);
+
+// with timeout
+socket.timeout(5000).emit("my-event", (err) => {
+  if (err) {
+    // the other side did not acknowledge the event in the given delay
+  }
+});
+```
