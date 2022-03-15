@@ -148,6 +148,7 @@ io.on("connection", (socket) => {
 #### script.js
 
 ```js
+let isReferee = false;
 //-----------folded
 // Start Game, Reset Everything
 function loadGame() {
@@ -158,12 +159,16 @@ function loadGame() {
 
 loadGame();
 
+//-----folded
+
 socket.on("connect", () => {
   console.log("Connected as...", socket.id);
 });
 
 socket.on("startGame", (refereeId) => {
   console.log("Referee is", refereeId);
+  isReferee = socket.id === refereeId;
+  startGame();
 });
 ```
 
@@ -171,7 +176,60 @@ socket.on("startGame", (refereeId) => {
 
 <img src="Sockets.assets/Screen Shot 2022-03-15 at 4.38.03 PM.png" alt="Screen Shot 2022-03-15 at 4.38.03 PM" style="zoom:50%;" />
 
-a
+## Paddle Logic
+
+#### script.js
+
+```js
+function startGame() {
+  //allocate the two paddle position (top/bottom) to user
+  paddleIndex = isReferee ? 0 : 1;
+  window.requestAnimationFrame(animate);
+  canvas.addEventListener("mousemove", (e) => {
+    playerMoved = true;
+    paddleX[paddleIndex] = e.offsetX;
+    if (paddleX[paddleIndex] < 0) {
+      paddleX[paddleIndex] = 0;
+    }
+    if (paddleX[paddleIndex] > width - paddleWidth) {
+      paddleX[paddleIndex] = width - paddleWidth;
+    }
+    //when paddle move, notify server to broadcast it to opponent's client
+    socket.emit('paddleMove', {
+      xPosition: paddleX[paddleIndex]
+    })
+    // Hide Cursor
+    canvas.style.cursor = "none";
+  });
+}
+
+//when received opponent's new paddle position by server, update the opponent's paddle position
+socket.on('paddleMove', (paddleData) => {
+  // Toggle 1 into 0, 0 into 1
+  const opponentPaddleIndex = 1 - paddleIndex;
+  paddleX[opponentPaddleIndex] = paddleData.xPosition
+})
+```
+
+#### server.js
+
+```js
+io.on("connection", (socket) => {
+  console.log("a user connected", socket.id);
+  socket.on("ready", () => {
+    console.log("Player ready", socket.id);
+    readyPlayerCount++;
+    if (readyPlayerCount === 2) {
+      io.emit("startGame", socket.id);
+    }
+  });
+  socket.on('paddleMove', (paddleData) => {
+      socket.broadcast.imit('paddleMove', paddleData)
+  })
+});
+```
+
+
 
 
 
